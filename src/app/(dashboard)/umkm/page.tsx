@@ -20,7 +20,7 @@ export default function UmkmPage() {
   }, []);
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 max-w-[1200px] mx-auto w-full">
+    <div className="space-y-6 p-4 sm:p-6 max-w-lg mx-auto w-full min-h-screen flex flex-col">
       <UmkmFlowPanel
         onCommitSuccess={refresh}
         onSwitchToBank={() => window.location.href = "/bank"}

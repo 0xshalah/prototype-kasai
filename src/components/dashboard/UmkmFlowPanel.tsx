@@ -227,28 +227,19 @@ export function UmkmFlowPanel({ onCommitSuccess, onSwitchToBank }: UmkmFlowPanel
               </table>
             </div>
 
-            {/* Stateful Guardrail Badges */}
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted mb-2">Guardrail Validation</p>
-              <div className="flex flex-wrap gap-2">
-                {/* Double-entry is always balanced at this point */}
-                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-success/10 border border-brand-success/20 text-brand-success text-[11px] rounded-full font-medium">
-                  <i className="fa-solid fa-check-circle text-[10px]" /> Double-entry balanced
-                </span>
-                {/* Entity rule depends on intent clarity */}
-                {parseResult.intent !== "ambiguous" ? (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-success/10 border border-brand-success/20 text-brand-success text-[11px] rounded-full font-medium">
-                    <i className="fa-solid fa-check-circle text-[10px]" /> SAK EMKM entity rule passed
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-warning/10 border border-brand-warning/20 text-brand-warning text-[11px] rounded-full font-medium">
-                    <i className="fa-solid fa-triangle-exclamation text-[10px]" /> SAK EMKM entity review required
-                  </span>
-                )}
-                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-info/10 border border-brand-info/20 text-brand-info text-[11px] rounded-full font-medium">
-                  <i className="fa-solid fa-scale-balanced text-[10px]" /> Intent: {parseResult.intent.toUpperCase()}
-                </span>
+            {/* State-Check Notification instead of technical badges */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 p-3 bg-brand-success/10 border border-brand-success/20 rounded-lg text-brand-success">
+                <i className="fa-solid fa-check-double text-xs" />
+                <span className="text-[11px] font-bold uppercase tracking-wider">Validasi SAK EMKM Terpenuhi</span>
               </div>
+              
+              {parseResult.intent === "ambiguous" && (
+                <div className="flex items-center gap-2 p-3 bg-brand-warning/10 border border-brand-warning/20 rounded-lg text-brand-warning">
+                  <i className="fa-solid fa-person-circle-question text-xs" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Konfirmasi Entitas Diperlukan</span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}

@@ -49,52 +49,79 @@ export default function LandingPage() {
            </span>
         </div>
 
-        {/* Proof Pillars (Features) - Solid Surfaces, no glassmorphism */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 slide-up"
-          style={{ animationDelay: "0.3s" }}
-        >
-          {[
-            {
-              icon: "fa-book-open",
-              title: "Pencatatan yang Konsisten dengan SAK EMKM",
-              desc: "Ucapan transaksi diterjemahkan menjadi jurnal terstruktur dengan guardrail akuntansi, termasuk pemisahan uang usaha dan uang pribadi.",
-            },
-            {
-              icon: "fa-scale-balanced",
-              title: "Sinyal Kelayakan untuk Pembiayaan",
-              desc: "Data transaksi harian diolah menjadi underwriting signal yang transparan dan terfaktorisasi untuk membantu pembacaan kondisi usaha secara lebih objektif.",
-            },
-            {
-              icon: "fa-link",
-              title: "Jejak Audit yang Dapat Diverifikasi",
-              desc: "Setiap transaksi ditautkan ke audit trail berbasis hash sehingga perubahan setelah pencatatan dapat dideteksi saat proses verifikasi.",
-            },
-          ].map((p, i) => (
-            <div
-              key={i}
-              className="bg-card flex flex-col items-center text-center border border-border-subtle p-8 rounded-2xl hover:border-border-strong transition-colors"
-            >
-              <div className="w-12 h-12 bg-accent-soft text-brand-primary rounded-full flex items-center justify-center text-xl mb-5">
-                <i className={`fa-solid ${p.icon}`} />
+        {/* The Three Surfaces of KasAI - NEW SECTION */}
+        <div className="mb-20 slide-up" style={{ animationDelay: "0.3s" }}>
+          <h2 className="text-2xl font-bold text-primary mb-10">Ekosistem Multi-Surface</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: "fa-mobile-screen-button",
+                role: "UMKM Companion",
+                title: "Input Cepat & Voice-First",
+                desc: "Simulasi mobile app untuk pedagang. Fokus pada input suara, otomasi jurnal, dan cek saldo instan.",
+                href: "/umkm",
+                color: "brand-primary",
+                label: "Mulai Mencatat"
+              },
+              {
+                icon: "fa-server",
+                role: "Evidence Console",
+                title: "Audit & Underwriting",
+                desc: "Dashboard desktop untuk Bank dan Auditor. Verifikasi transparansi, ACS, dan jejak audit blockchain.",
+                href: "/bank",
+                color: "brand-info",
+                label: "Buka Konsol Auditor"
+              },
+              {
+                icon: "fa-file-invoice-dollar",
+                role: "Business Admin",
+                title: "Laporan & Dokumen Pendaftaran",
+                desc: "Roadmap: Workspace untuk pemilik usaha mengelola laporan bulanan, ekspor PDF/Excel, dan pengajuan pajak.",
+                href: "/admin",
+                color: "brand-warning",
+                label: "Lihat Roadmap"
+              }
+            ].map((s, i) => (
+              <div
+                key={i}
+                className="bg-card flex flex-col items-start text-left border border-border-subtle p-6 rounded-2xl hover:border-border-strong transition-all hover:shadow-lg group"
+              >
+                <div className={`w-10 h-10 bg-accent-soft text-${s.color} rounded-lg flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform`}>
+                  <i className={`fa-solid ${s.icon}`} />
+                </div>
+                <div className={`text-[10px] font-bold uppercase tracking-widest text-${s.color} mb-1`}>{s.role}</div>
+                <h3 className="text-primary font-bold mb-3 text-base leading-snug">{s.title}</h3>
+                <p className="text-xs text-secondary leading-relaxed mb-6">{s.desc}</p>
+                
+                <Link
+                  href={s.href}
+                  className={`mt-auto w-full py-2.5 rounded-lg border border-border-subtle text-xs font-bold text-center transition-colors hover:bg-card-muted text-primary`}
+                >
+                  {s.label}
+                </Link>
               </div>
-              <h3 className="text-primary font-bold mb-3 text-lg leading-snug">{p.title}</h3>
-              <p className="text-sm text-secondary leading-relaxed">{p.desc}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* CTA */}
-        <div className="slide-up flex flex-col items-center gap-4" style={{ animationDelay: "0.4s" }}>
-          <Link
-            href="/umkm"
-            className="px-8 py-4 bg-brand-primary hover:bg-brand-primary-hover text-on-brand text-base font-bold rounded-xl shadow-lg shadow-brand-primary/20 transition-all inline-flex items-center gap-3"
-          >
-            Lihat Evidence Console
-            <i className="fa-solid fa-arrow-right" />
-          </Link>
-          <p className="text-xs text-muted mt-2">
-            Prototype interaktif dengan data demo terkontrol dan skenario simulasi.
+        {/* Hero CTA - Simpler and direct */}
+        <div className="slide-up flex flex-col items-center gap-6" style={{ animationDelay: "0.4s" }}>
+          <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+            <Link
+              href="/umkm"
+              className="flex-1 px-8 py-4 bg-brand-primary hover:opacity-90 text-on-brand text-sm font-bold rounded-xl shadow-lg shadow-brand-primary/20 transition-all text-center"
+            >
+              Mencatat Sebagai UMKM
+            </Link>
+            <Link
+              href="/bank"
+              className="flex-1 px-8 py-4 bg-card border border-border-subtle hover:border-border-strong text-primary text-sm font-bold rounded-xl transition-all text-center"
+            >
+              Portal Auditor & Bank
+            </Link>
+          </div>
+          <p className="text-[11px] text-muted max-w-xs mx-auto">
+            Gunakan data demo untuk mensimulasikan alur pencatatan suara hingga verifikasi audit trail.
           </p>
         </div>
       </div>
