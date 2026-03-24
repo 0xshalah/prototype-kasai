@@ -35,7 +35,7 @@ export function VoiceRecorder({ onTranscript, disabled }: VoiceRecorderProps) {
             } else {
               setTranscriptionError(`Transkripsi suara sedang tidak tersedia. ${res.error?.message || ''}. Anda tetap bisa melanjutkan dengan input teks manual.`);
             }
-          } catch (e) {
+          } catch {
             setTranscriptionError("Terjadi kesalahan jaringan saat transkripsi. Anda tetap bisa melanjutkan dengan input teks manual.");
           } finally {
             setIsTranscribing(false);

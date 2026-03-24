@@ -8,7 +8,7 @@ export async function GET(req: Request) {
 
     const blocks = await VaultRepository.findBlocks(limit);
 
-    const items = blocks.map((b: any) => ({
+    const items = blocks.map((b) => ({
       blockIndex: b.blockIndex,
       transactionId: b.transactionId,
       canonicalPayload: b.canonicalPayload,
@@ -21,14 +21,11 @@ export async function GET(req: Request) {
       data: { items }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch vault chain";
     return NextResponse.json({
         success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error.message || "Failed to fetch vault chain",
-          details: {}
-        }
+        error: { code: "INTERNAL_ERROR", message, details: {} }
     }, { status: 500 });
   }
 }

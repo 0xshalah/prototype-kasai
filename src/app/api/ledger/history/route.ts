@@ -17,14 +17,11 @@ export async function GET() {
       data: snapshots.reverse() // Reverse so chronological (oldest to newest)
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch ledger history";
     return NextResponse.json({
         success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error.message || "Failed to fetch ledger history",
-          details: {}
-        }
+        error: { code: "INTERNAL_ERROR", message, details: {} }
     }, { status: 500 });
   }
 }

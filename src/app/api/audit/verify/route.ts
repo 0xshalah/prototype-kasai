@@ -101,14 +101,11 @@ export async function GET() {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to verify vault chain";
     return NextResponse.json({
         success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error.message || "Failed to verify vault chain",
-          details: {}
-        }
+        error: { code: "INTERNAL_ERROR", message, details: {} }
     }, { status: 500 });
   }
 }

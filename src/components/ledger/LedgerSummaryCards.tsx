@@ -17,7 +17,7 @@ export function LedgerSummaryCards() {
         } else {
           setError(res.error?.message || "Gagal memuat saldo");
         }
-      } catch (e) {
+      } catch {
         setError("Network error");
       } finally {
         setIsLoading(false);

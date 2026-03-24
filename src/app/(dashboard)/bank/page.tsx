@@ -38,8 +38,9 @@ export default function BankPage() {
       } else {
         alert("Gagal mereset: " + json.error?.message);
       }
-    } catch(e: any) {
-      alert("Error menghubungi server: " + e.message);
+    } catch(e: unknown) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      alert("Error menghubungi server: " + msg);
     }
   };
 

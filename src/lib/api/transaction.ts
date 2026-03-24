@@ -16,7 +16,7 @@ export type ApiResponse<T> = {
   error?: {
     code: string;
     message: string;
-    details: any;
+    details: unknown;
   };
 };
 
@@ -34,7 +34,7 @@ export type CommitResponseData = {
   transactionId: string;
   journalEntries: { accountName: string; entryType: string; amount: number }[];
   ledgerSummary: { cashBalance: number; expenseTotal: number; priveTotal: number };
-  scoreSnapshot: { totalScore: number; factors: any[] };
+  scoreSnapshot: { totalScore: number; factors: Record<string, unknown>[] };
   vaultBlock: { blockIndex: number; transactionId: string; canonicalPayload: string; prevHash: string; hash: string };
 };
 

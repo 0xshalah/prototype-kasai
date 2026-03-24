@@ -5,7 +5,7 @@ import { VoiceInput } from "./VoiceInput";
 import { TransactionReview } from "./TransactionReview";
 import { LedgerLiveStatus } from "./LedgerLiveStatus";
 import { useVoiceCapture } from "@/hooks/useVoiceCapture";
-import { parseTransaction, commitTransaction, TransactionParseResult, CommitRequest } from "@/lib/api/transaction";
+import { parseTransaction, commitTransaction, TransactionParseResult, CommitRequest, CommitResponseData } from "@/lib/api/transaction";
 import { transcribeAudio } from "@/lib/api/transcribe";
 
 type FlowState = 'IDLE' | 'RECORDING' | 'PROCESSING' | 'CONFIRMING' | 'COMMITTED' | 'ERROR';
@@ -22,7 +22,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
 
   const [parseResult, setParseResult] = useState<TransactionParseResult | null>(null);
   const [ambiguityError, setAmbiguityError] = useState<{message: string, details: TransactionParseResult | null} | null>(null);
-  const [commitSuccessData, setCommitSuccessData] = useState<any | null>(null);
+  const [commitSuccessData, setCommitSuccessData] = useState<CommitResponseData | null>(null);
 
   const voiceCapture = useVoiceCapture();
 
@@ -66,7 +66,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
         setErrorMessage(`Gagal transkripsi suara: ${res.error?.message}. Coba ketik secara manual.`);
         setFlowState('IDLE');
       }
-    } catch (e) {
+    } catch {
        setErrorMessage("Kesalahan jaringan saat transkripsi.");
        setFlowState('IDLE');
     }
@@ -88,14 +88,14 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
       } else if (res.error?.code === "NEEDS_HUMAN_REVIEW") {
         setAmbiguityError({
           message: res.error.message,
-          details: res.error.details
+          details: res.error.details as TransactionParseResult
         });
         setFlowState('CONFIRMING');
       } else {
         setErrorMessage(res.error?.message || "Gagal memparsing teks");
         setFlowState('IDLE');
       }
-    } catch (e) {
+    } catch {
       setErrorMessage("Terjadi kesalahan jaringan saat parsing");
       setFlowState('IDLE');
     }
@@ -106,7 +106,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
     setFlowState('PROCESSING');
     setErrorMessage(null);
     
-    const targetData = parseResult || (ambiguityError?.details as TransactionParseResult);
+    const targetData = parseResult || (ambiguityError?.details as TransactionParseResult | null);
     if (!targetData) {
        setFlowState('IDLE');
        return;
@@ -134,7 +134,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
         setErrorMessage(msg + hint);
         setFlowState('CONFIRMING'); // Return to confirming so user can adjust or cancel
       }
-    } catch (e) {
+    } catch {
       setErrorMessage("Gagal terhubung ke server.");
       setFlowState('CONFIRMING');
     }

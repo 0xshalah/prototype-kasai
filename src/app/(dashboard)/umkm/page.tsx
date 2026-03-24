@@ -1,22 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { UmkmFlowPanel } from "@/components/dashboard/UmkmFlowPanel";
 import { LiveFinancePanel } from "@/components/dashboard/LiveFinancePanel";
 import { getLedgerSummary } from "@/lib/api/ledger";
-import { LedgerSummaryData } from "@/lib/api/ledger";
 import Link from "next/link";
 
 export default function UmkmPage() {
-  const [summary, setSummary] = useState<LedgerSummaryData>({
-    cashBalance: 5_000_000,
-    expenseTotal: 0,
-    priveTotal: 0
-  });
 
   const refresh = useCallback(async () => {
-    const res = await getLedgerSummary();
-    if (res.success && res.data) setSummary(res.data);
+    await getLedgerSummary(); // trigger upstream refresh
   }, []);
 
   return (

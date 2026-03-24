@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
+type CashDataPoint = { name: string; NilaiKas: number; createdAt: string };
+
 export function CashFlowChart({ forceRefresh = 0 }: { forceRefresh?: number }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<CashDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export function CashFlowChart({ forceRefresh = 0 }: { forceRefresh?: number }) {
         const res = await fetch("/api/ledger/history");
         const json = await res.json();
         if (json.success && json.data) {
-          const chartData = json.data.map((item: any, idx: number) => ({
+          const chartData: CashDataPoint[] = json.data.map((item: { cashBalance: number; createdAt: string }, idx: number) => ({
             name: `Tx ${idx + 1}`,
             NilaiKas: item.cashBalance,
             createdAt: new Date(item.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
@@ -64,7 +66,7 @@ export function CashFlowChart({ forceRefresh = 0 }: { forceRefresh?: number }) {
             <Tooltip 
               contentStyle={{ backgroundColor: '#1E1E1E', borderColor: '#333', borderRadius: '8px' }}
               itemStyle={{ color: '#10B981' }}
-              formatter={(value: any) => [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Saldo Kas']}
+              formatter={(value) => [`Rp ${Number(value ?? 0).toLocaleString('id-ID')}`, 'Saldo Kas']}
               labelStyle={{ color: '#888' }}
             />
             <Area 

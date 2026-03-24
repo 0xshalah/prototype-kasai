@@ -6,7 +6,6 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "10");
 
-    // Get recent transactions that were committed
     const recentTransactions = await prisma.transaction.findMany({
       where: { status: "COMMITTED" },
       take: limit,
@@ -14,29 +13,23 @@ export async function GET(req: Request) {
       include: { journalEntries: true }
     });
 
-    const items = recentTransactions.map((t: any) => ({
+    const items = recentTransactions.map((t) => ({
       transactionId: t.id,
       createdAt: t.createdAt.toISOString(),
-      entries: t.journalEntries.map((je: any) => ({
+      entries: t.journalEntries.map((je) => ({
         accountName: je.accountName,
         entryType: je.entryType,
         amount: je.amount
       }))
     }));
 
-    return NextResponse.json({
-      success: true,
-      data: { items }
-    });
+    return NextResponse.json({ success: true, data: { items } });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch journal entries";
     return NextResponse.json({
         success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error.message || "Failed to fetch journal entries",
-          details: {}
-        }
+        error: { code: "INTERNAL_ERROR", message, details: {} }
     }, { status: 500 });
   }
 }

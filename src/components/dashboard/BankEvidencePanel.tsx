@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getVaultChain, verifyAudit, demoTamper, VaultBlockItem } from "@/lib/api/audit";
-import { ScoreBreakdownTable } from "../bank/ScoreBreakdownTable";
 import { VerifyBanner } from "../bank/VerifyBanner";
 import { VaultChainTable } from "../bank/VaultChainTable";
 import { AcsScoreGauge } from "../bank/AcsScoreGauge";
@@ -62,7 +61,7 @@ export function BankEvidencePanel({ onRefresh }: BankEvidencePanelProps) {
         setVerifyStatus("error");
         setVerifyMessage(res.error?.message || "Kesalahan validasi jaringan");
       }
-    } catch (e) {
+    } catch {
       setVerifyStatus("error");
       setVerifyMessage("Terjadi kesalahan jaringan saat verifikasi");
     }
@@ -91,7 +90,7 @@ export function BankEvidencePanel({ onRefresh }: BankEvidencePanelProps) {
       } else {
         alert("Gagal simulasi: " + (res.error?.message || "Unknown error"));
       }
-    } catch (e) {
+    } catch {
       alert("Gagal terhubung ke server saat tamper.");
     }
   };

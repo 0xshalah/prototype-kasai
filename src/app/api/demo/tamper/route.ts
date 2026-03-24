@@ -73,14 +73,11 @@ export async function POST() {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to tamper block";
     return NextResponse.json({
         success: false,
-        error: {
-          code: "INTERNAL_ERROR",
-          message: error.message || "Failed to tamper block",
-          details: {}
-        }
+        error: { code: "INTERNAL_ERROR", message, details: {} }
     }, { status: 500 });
   }
 }

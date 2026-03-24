@@ -62,7 +62,8 @@ export async function POST() {
     });
 
     return NextResponse.json({ success: true, message: "Vault reset successfully" });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: { message: error.message } }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Reset failed";
+    return NextResponse.json({ success: false, error: { message } }, { status: 500 });
   }
 }

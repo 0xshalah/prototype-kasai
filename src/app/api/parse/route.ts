@@ -85,7 +85,7 @@ export async function POST(req: Request) {
         const p = fallbackParse(rawText);
         finalParsed = {
             rawText,
-            intent: p.intent as any,
+            intent: p.intent as "revenue" | "expense" | "prive" | "ambiguous" | "capital",
             amount: p.amount,
             currency: "IDR",
             debitAccount: p.debitAccount,
@@ -112,12 +112,13 @@ export async function POST(req: Request) {
       data: finalParsed
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to process request";
     return NextResponse.json({
         success: false,
         error: {
           code: "INTERNAL_ERROR",
-          message: error.message || "Failed to process request",
+          message,
           details: {}
         }
     }, { status: 500 });
