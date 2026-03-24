@@ -60,7 +60,8 @@ export default function LandingPage() {
                 title: "Input Cepat & Voice-First",
                 desc: "Simulasi mobile app untuk pedagang. Fokus pada input suara, otomasi jurnal, dan cek saldo instan.",
                 href: "/umkm",
-                color: "brand-primary",
+                colorClass: "text-brand-primary",
+                bgClass: "bg-accent-soft",
                 label: "Mulai Mencatat"
               },
               {
@@ -69,7 +70,8 @@ export default function LandingPage() {
                 title: "Audit & Underwriting",
                 desc: "Dashboard desktop untuk Bank dan Auditor. Verifikasi transparansi, ACS, dan jejak audit blockchain.",
                 href: "/bank",
-                color: "brand-info",
+                colorClass: "text-brand-info",
+                bgClass: "bg-accent-soft",
                 label: "Buka Konsol Auditor"
               },
               {
@@ -78,7 +80,8 @@ export default function LandingPage() {
                 title: "Laporan & Dokumen Pendaftaran",
                 desc: "Roadmap: Workspace untuk pemilik usaha mengelola laporan bulanan, ekspor PDF/Excel, dan pengajuan pajak.",
                 href: "/admin",
-                color: "brand-warning",
+                colorClass: "text-brand-warning",
+                bgClass: "bg-accent-soft",
                 label: "Lihat Roadmap"
               }
             ].map((s, i) => (
@@ -86,16 +89,17 @@ export default function LandingPage() {
                 key={i}
                 className="bg-card flex flex-col items-start text-left border border-border-subtle p-6 rounded-2xl hover:border-border-strong transition-all hover:shadow-lg group"
               >
-                <div className={`w-10 h-10 bg-accent-soft text-${s.color} rounded-lg flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform`}>
+                <div className={`w-10 h-10 ${s.bgClass} ${s.colorClass} rounded-lg flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform border border-border-subtle`}>
                   <i className={`fa-solid ${s.icon}`} />
+                  <span className="sr-only">Icon</span>
                 </div>
-                <div className={`text-[10px] font-bold uppercase tracking-widest text-${s.color} mb-1`}>{s.role}</div>
+                <div className={`text-[10px] font-bold uppercase tracking-widest ${s.colorClass} mb-1`}>{s.role}</div>
                 <h3 className="text-primary font-bold mb-3 text-base leading-snug">{s.title}</h3>
                 <p className="text-xs text-secondary leading-relaxed mb-6">{s.desc}</p>
                 
                 <Link
                   href={s.href}
-                  className={`mt-auto w-full py-2.5 rounded-lg border border-border-subtle text-xs font-bold text-center transition-colors hover:bg-card-muted text-primary`}
+                  className="mt-auto w-full py-2.5 rounded-lg border border-border-subtle text-xs font-bold text-center transition-colors hover:bg-card-muted text-primary"
                 >
                   {s.label}
                 </Link>

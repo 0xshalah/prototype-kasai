@@ -59,8 +59,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       <div className="bg-card border-b border-border-subtle px-4 sm:px-6 pt-4 transition-colors duration-300">
         <nav className="max-w-[1200px] mx-auto flex">
           {[
-            { href: "/umkm", label: "1. Input Experience (UMKM)", icon: "fa-store" },
-            { href: "/bank", label: "2. Outcome & Trust (Bank)", icon: "fa-building-columns" },
+            { href: "/umkm", label: "1. UMKM Companion", icon: "fa-store" },
+            { href: "/bank", label: "2. Evidence Console", icon: "fa-building-columns" },
+            { href: "/admin", label: "3. Business Admin", icon: "fa-file-invoice-dollar" },
           ].map((t) => {
             const active = path === t.href;
             return (

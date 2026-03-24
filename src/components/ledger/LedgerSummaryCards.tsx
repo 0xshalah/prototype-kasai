@@ -44,26 +44,41 @@ export function LedgerSummaryCards() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className="bg-card p-6 rounded-xl shadow-sm border-l-4 border-l-brand-primary border-t border-r border-b border-border-subtle">
-        <h3 className="text-muted text-sm font-medium">Saldo Kas Aktif</h3>
-        <p className="text-2xl font-bold text-primary mt-2">
-          Rp {data?.cashBalance.toLocaleString("id-ID")}
-        </p>
+    <div className="grid grid-cols-1 gap-4">
+      <div className="bg-card p-5 rounded-xl shadow-sm border-l-4 border-l-brand-primary border-t border-r border-b border-border-subtle flex justify-between items-center">
+        <div>
+          <h3 className="text-muted text-[10px] font-bold uppercase tracking-wider">Saldo Kas Aktif</h3>
+          <p className="text-xl font-bold text-primary mt-1">
+            Rp {data?.cashBalance.toLocaleString("id-ID")}
+          </p>
+        </div>
+        <div className="text-brand-primary opacity-20 text-2xl">
+          <i className="fa-solid fa-wallet" />
+        </div>
       </div>
       
-      <div className="bg-card p-6 rounded-xl shadow-sm border-l-4 border-l-brand-warning border-t border-r border-b border-border-subtle">
-        <h3 className="text-muted text-sm font-medium">Total Beban Operasional</h3>
-        <p className="text-2xl font-bold text-primary mt-2">
-          Rp {data?.expenseTotal.toLocaleString("id-ID")}
-        </p>
+      <div className="bg-card p-5 rounded-xl shadow-sm border-l-4 border-l-brand-warning border-t border-r border-b border-border-subtle flex justify-between items-center">
+        <div>
+          <h3 className="text-muted text-[10px] font-bold uppercase tracking-wider">Beban Operasional</h3>
+          <p className="text-xl font-bold text-primary mt-1">
+            Rp {data?.expenseTotal.toLocaleString("id-ID")}
+          </p>
+        </div>
+        <div className="text-brand-warning opacity-20 text-2xl">
+          <i className="fa-solid fa-receipt" />
+        </div>
       </div>
 
-      <div className="bg-card p-6 rounded-xl shadow-sm border-l-4 border-l-brand-danger border-t border-r border-b border-border-subtle">
-        <h3 className="text-muted text-sm font-medium">Total Prive (Pribadi)</h3>
-        <p className="text-2xl font-bold text-primary mt-2">
-          Rp {data?.priveTotal.toLocaleString("id-ID")}
-        </p>
+      <div className="bg-card p-5 rounded-xl shadow-sm border-l-4 border-l-brand-danger border-t border-r border-b border-border-subtle flex justify-between items-center">
+        <div>
+          <h3 className="text-muted text-[10px] font-bold uppercase tracking-wider">Prive (Pribadi)</h3>
+          <p className="text-xl font-bold text-primary mt-1">
+            Rp {data?.priveTotal.toLocaleString("id-ID")}
+          </p>
+        </div>
+        <div className="text-brand-danger opacity-20 text-2xl">
+          <i className="fa-solid fa-user-gear" />
+        </div>
       </div>
     </div>
   );
