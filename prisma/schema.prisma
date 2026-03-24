@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id             String   @id @default(cuid())
+  businessId     String   @map("business_id")
+  rawText        String   @map("raw_text")
+  parsedIntent   String   @map("parsed_intent")
+  amount         Int
+  debitAccount   String?  @map("debit_account")
+  creditAccount  String?  @map("credit_account")
+  status         String   // e.g., "COMMITTED", "PENDING", "FAILED"
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  journalEntries JournalEntry[]
+  scoreSnapshots ScoreSnapshot[]
+  vaultBlocks    VaultBlock[]
+
+  @@map("transactions")
+}
+
+model JournalEntry {
+  id            String   @id @default(cuid())
+  transactionId String   @map("transaction_id")
+  accountName   String   @map("account_name")
+  entryType     String   @map("entry_type") // "debit" or "credit"
+  amount        Int
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@map("journal_entries")
+}
+
+model BalanceSnapshot {
+  id           String   @id @default(cuid())
+  businessId   String   @map("business_id")
+  cashBalance  Int      @map("cash_balance")
+  expenseTotal Int      @map("expense_total")
+  priveTotal   Int      @map("prive_total")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([businessId])
+  @@map("balance_snapshots")
+}
+
+model ScoreSnapshot {
+  id                String   @id @default(cuid())
+  transactionId     String   @map("transaction_id")
+  totalScore        Int      @map("total_score")
+  factorConsistency Int      @map("factor_consistency")
+  factorSeparation  Int      @map("factor_separation")
+  factorCashflow    Int      @map("factor_cashflow")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  transaction       Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@map("score_snapshots")
+}
+
+model VaultBlock {
+  id               String   @id @default(cuid())
+  blockIndex       Int      @unique @map("block_index")
+  transactionId    String?  @map("transaction_id") // Optional for Genesis block
+  canonicalPayload String   @map("canonical_payload")
+  prevHash         String   @map("prev_hash")
+  hash             String   @unique
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  transaction      Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([blockIndex])
+  @@map("vault_blocks")
+}
+
+model AuditEvent {
+  id               String   @id @default(cuid())
+  eventType        String   @map("event_type") // "tamper", "verify", "reset"
+  targetBlockIndex Int?     @map("target_block_index")
+  message          String
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  @@map("audit_events")
+}

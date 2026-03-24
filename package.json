@@ -1,0 +1,36 @@
+{
+  "name": "kasai-fullstack",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "npx tsx prisma/seed.ts",
+    "db:setup": "prisma db push && npx tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "next": "^15.5.14",
+    "openai": "^6.32.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "eslint": "^9.23.0",
+    "eslint-config-next": "^15.2.4",
+    "prisma": "^6.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.2"
+  }
+}
