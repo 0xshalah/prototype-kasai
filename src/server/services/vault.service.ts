@@ -21,7 +21,7 @@ export class VaultService {
       lastBlock = await VaultRepository.createBlock({
           blockIndex: 0,
           canonicalPayload: genesisPayload,
-          prevHash: "00",
+          prevHash: "0000000000000000000000000000000000000000000000000000000000000000",
           hash: genesisHash,
         }, tx);
     }

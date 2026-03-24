@@ -47,7 +47,13 @@ export class LedgerService {
     const oldExpense = lastBalance?.expenseTotal || 0;
     const oldPrive = lastBalance?.priveTotal || 0;
 
-    const newCash = oldCash - data.amount;
+    const newCash =
+      data.debitAccount === "Kas"
+        ? oldCash + data.amount
+        : data.creditAccount === "Kas"
+        ? oldCash - data.amount
+        : oldCash;
+
     const newExpense = data.intent === "expense" ? oldExpense + data.amount : oldExpense;
     const newPrive = data.intent === "prive" ? oldPrive + data.amount : oldPrive;
 

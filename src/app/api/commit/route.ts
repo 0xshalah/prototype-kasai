@@ -9,7 +9,7 @@ import { VaultService } from "@/server/services/vault.service";
 
 const CommitRequestSchema = z.object({
   rawText: z.string(),
-  intent: z.enum(["expense", "prive"]),
+  intent: z.enum(["revenue", "expense", "prive"]),
   amount: z.number().int().positive(),
   currency: z.literal("IDR"),
   debitAccount: z.string(),

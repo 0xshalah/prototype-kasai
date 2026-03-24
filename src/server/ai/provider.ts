@@ -17,7 +17,7 @@ export interface AIProvider {
 
 // A simple factory to load the active provider based on env
 export async function getActiveAIProvider(): Promise<AIProvider | null> {
-  const activeName = process.env.AI_PROVIDER || 'alibaba';
+  const activeName = process.env.AI_PROVIDER || 'openai';
   
   if (activeName === 'alibaba') {
     const { AlibabaModelStudioProvider } = await import('./providers/alibaba');

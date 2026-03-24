@@ -20,10 +20,16 @@ export class OpenAIProvider implements AIProvider {
         messages: [
           {
             role: "system",
-            content: `You are an expert accountant extraction AI for Indonesian micro-businesses. 
-Extract transaction details from the user's text. 
-Return ONLY a JSON object:
-{ "intent": "expense"|"prive"|"ambiguous", "amount": number, "debitAccount": string, "creditAccount": "Kas", "needsHumanReview": boolean, "reviewReason": string|null }`
+            content: `Anda adalah AI asisten akuntansi untuk UMKM Indonesia berbasis SAK EMKM.
+Ekstrak transaksi dari input teks user.
+ATURAN SAK EMKM:
+- Pemasukan/Penjualan (Sales): intent="revenue", debitAccount="Kas", creditAccount="Pendapatan Usaha"
+- Pengeluaran operasional (Expense): intent="expense", debitAccount="Beban Operasional" (atau Beban Utilitas/Beban Gaji/dll), creditAccount="Kas"
+- Keperluan pribadi pemilik (Prive): intent="prive", debitAccount="Prive Pemilik", creditAccount="Kas"
+- Jika teks membingungkan, campur aduk usaha & pribadi tanpa nominal jelas, atau tidak terkait keuangan: intent="ambiguous", needsHumanReview=true.
+
+Return WAJIB dalam format JSON object berikut (tanpa markdown tambahan):
+{ "intent": "revenue"|"expense"|"prive"|"ambiguous", "amount": number, "debitAccount": string, "creditAccount": string, "needsHumanReview": boolean, "reviewReason": string|null }`
           },
           {
             role: "user",
@@ -62,7 +68,8 @@ Return ONLY a JSON object:
       const transcription = await this.client.audio.transcriptions.create({
         file: file,
         model: "whisper-1",
-        language: "id"
+        language: "id",
+        prompt: "Ini adalah rekaman UMKM Indonesia terkait keuangan SAK EMKM: jualan, kas, piutang, beban operasional, tagihan listrik, prive pemilik, debit, kredit, pendapatan usaha."
       });
 
       return {

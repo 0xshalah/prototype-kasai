@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getActiveAIProvider } from "@/server/ai/provider";
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const SUPPORTED_MIME_TYPES = [
   "audio/webm",
   "audio/webm;codecs=opus",
@@ -53,118 +53,66 @@ export async function POST(req: Request) {
       }, { status: 415 });
     }
 
-    const provider = await getActiveAIProvider();
-    const primaryProviderName = process.env.AI_PROVIDER || 'alibaba';
+    const voiceApiUrl = process.env.VOICE_API_URL;
 
-    if (process.env.DEMO_TRANSCRIBE_MOCK === 'true') {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        return NextResponse.json({
-          success: true,
-          data: {
-            transcript: "Bayar tagihan listrik ruko 300 ribu", 
-            confidence: 0.98,
-            durationSeconds: 3.4,
-            provider: "mock"
-          }
-        });
+    if (!voiceApiUrl) {
+      return NextResponse.json({
+        success: false,
+        error: {
+          code: "VOICE_API_NOT_CONFIGURED",
+          message: "Sovereign AI VPS URL belum dikonfigurasi di .env",
+          details: {}
+        }
+      }, { status: 503 });
     }
-
-    if (!provider) {
-        return NextResponse.json({
-            success: false,
-            error: {
-                code: "TRANSCRIBE_PROVIDER_NOT_CONFIGURED",
-                message: "No AI provider configured for transcription",
-                details: {}
-            }
-        }, { status: 503 });
-    }
-
-    const fileForAI = new File([await audioFile.arrayBuffer()], "audio.webm", {
-        type: audioFile.type
-    });
-
-    let transcriptData: { transcript: string; confidence: number; } | null = null;
-    let fallbackTriggered = false;
-    let providerUsed = primaryProviderName;
-    
-    // Explicit Tracking for Structured Error
-    const diagnosticDetails: Record<string, unknown> = {
-      primary: null,
-      fallback: null
-    };
 
     try {
-        console.log(`[Voice Pipeline] Attempting Primary Edge: ${primaryProviderName}`);
-        transcriptData = await provider.transcribeAudio(fileForAI);
+      console.log(`[Voice Pipeline] Forwarding payload ke Sovereign AI: ${voiceApiUrl}`);
+
+      // Forward file-nya saja ke VPS menggunakan formData Node native
+      const vpsFormData = new FormData();
+      vpsFormData.append('audio', audioFile, audioFile.name || 'recording.webm');
+      
+      const response = await fetch(voiceApiUrl, {
+        method: 'POST',
+        body: vpsFormData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `VPS Transcription failed with status ${response.status}`);
+      }
+
+      const transcriptText = data.transcript || "";
+
+      if (!transcriptText.trim()) {
+        throw new Error("Transkripsi mengembalikan hasil kosong");
+      }
+
+      return NextResponse.json({
+          success: true,
+          data: {
+              transcript: transcriptText,
+              confidence: 0.99, // Assumption from VPS
+              durationSeconds: 0,
+              provider: "vps-sovereign",
+              fallbackTriggered: false
+          }
+      });
     } catch (primaryError: unknown) {
         const pErr = primaryError instanceof Error ? primaryError : new Error(String(primaryError));
-        console.warn(`[Voice Pipeline] Primary Provider Failed: ${pErr.message}`);
+        console.error(`[Voice Pipeline] VPS Provider Failed: ${pErr.message}`);
         
-        diagnosticDetails.primary = {
-            provider: primaryProviderName,
-            status: "failed",
-            reason: pErr.message || "Unknown Provider Error"
-        };
-        
-        // Disable OpenAI fallback temporarily due to known quota limits (429) unless explicitly forced
-        const isFallbackEnabled = false; // Intentionally disabled per user diagnosis
-        
-        if (isFallbackEnabled && primaryProviderName === 'alibaba' && process.env.OPENAI_API_KEY) {
-            console.log(`[Voice Pipeline] Connecting to Fallback Provider: openai`);
-            try {
-                const { OpenAIProvider } = await import('@/server/ai/providers/openai');
-                const fallbackProvider = new OpenAIProvider();
-                transcriptData = await fallbackProvider.transcribeAudio(fileForAI);
-                
-                if (transcriptData) {
-                    providerUsed = 'openai';
-                    fallbackTriggered = true;
-                }
-            } catch (fallbackError: unknown) {
-                const fErr = fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError));
-                console.error(`[Voice Pipeline] Fallback Provider Failed: ${fErr.message}`);
-                diagnosticDetails.fallback = {
-                    provider: 'openai',
-                    status: "failed",
-                    reason: fErr.message || "Unknown Fallback Error"
-                };
-            }
-        } else {
-            console.warn(`[Voice Pipeline] All providers exhausted. Activating Hackathon DEMO Bypass...`);
-            // HACKATHON DEMO BYPASS: Since Alibaba strictly orchestrates Voice via OSS (file_urls) 
-            // and OpenAI quota is 429, we inject a graceful mock so the judges can still see the UI flow.
-            await new Promise((resolve) => setTimeout(resolve, 1200));
-            transcriptData = {
-                transcript: "Ini adalah simulasi transkripsi otomatis. Beli persediaan masker 1 setengah juta rupiah pakai kas.",
-                confidence: 0.99
-            };
-            providerUsed = 'alibaba-mock-fallback';
-            fallbackTriggered = true;
-        }
-    }
-
-    if (!transcriptData) {
         return NextResponse.json({
             success: false,
             error: {
-                code: "TRANSCRIPTION_ALL_PROVIDERS_FAILED",
-                message: "Semua provider transkripsi gagal beroperasi",
-                details: diagnosticDetails
+                code: "TRANSCRIPTION_FAILED",
+                message: "Gagal memproses audio di Sovereign AI",
+                details: { error: pErr.message }
             }
         }, { status: 500 });
     }
-
-    return NextResponse.json({
-        success: true,
-        data: {
-            transcript: transcriptData.transcript,
-            confidence: transcriptData.confidence,
-            durationSeconds: 0,
-            provider: providerUsed,
-            fallbackTriggered
-        }
-    });
 
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));

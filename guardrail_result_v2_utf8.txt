@@ -1,0 +1,26 @@
+﻿=======================================================
+≡ƒ¢í∩╕Å  GUARDRAIL VERIFICATION LOOP
+=======================================================
+Γ£à Reset sukses. Baseline: Kas Rp5.000.000
+
+Γû╢  TEST A: Ambiguous Input ('Ambil uang kas 200 ribu')
+   Status: ERROR
+   Error Code: NEEDS_HUMAN_REVIEW
+   Message: Transaksi ambigu dan memerlukan klarifikasi pengguna
+   Journal b/a: 1/1
+   Cash b/a   : Rp5000000/5000000
+   Vault b/a  : 0/0
+   RESULT A   : Γ£à PASSED (Blocked as expected)
+
+Γû╢  TEST B: Insufficient Cash ('Bayar renovasi toko 10 juta')
+   Status: ERROR
+   Error Code: INSUFFICIENT_FUNDS
+   Message: INSUFFICIENT_FUNDS: Available 5000000, required 10000000
+   Journal b/a: 1/1
+   Cash b/a   : Rp5000000/5000000
+   Vault b/a  : 0/0
+   RESULT B   : Γ£à PASSED (Blocked as expected)
+
+=======================================================
+≡ƒÄë OVERALL GUARDRAIL: PASSED
+=======================================================

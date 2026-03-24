@@ -1,6 +1,6 @@
 export type TransactionParseResult = {
   rawText: string;
-  intent: "expense" | "prive" | "ambiguous";
+  intent: "revenue" | "expense" | "prive" | "ambiguous";
   amount: number;
   currency: "IDR";
   debitAccount: string | null;
@@ -22,7 +22,7 @@ export type ApiResponse<T> = {
 
 export type CommitRequest = {
   rawText: string;
-  intent: "expense" | "prive";
+  intent: "revenue" | "expense" | "prive";
   amount: number;
   currency: "IDR";
   debitAccount: string;

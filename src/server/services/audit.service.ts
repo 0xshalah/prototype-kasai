@@ -16,7 +16,8 @@ export class AuditService {
   async verifyChain(businessId: string) {
     const blocks = await this.prisma.vaultBlock.findMany({
       take: 1000,
-      orderBy: { blockIndex: "asc" }
+      orderBy: { blockIndex: "asc" },
+      include: { transaction: true },
     });
 
     if (blocks.length === 0) {
@@ -32,7 +33,20 @@ export class AuditService {
       const recalculatedHash = this.sha256Hex(block.canonicalPayload);
       const digestBroken = recalculatedHash !== block.hash;
 
-      if (linkageBroken || digestBroken) {
+      let dataBroken = false;
+      if (block.blockIndex > 0) {
+        if (!block.transaction) {
+          dataBroken = true;
+        } else {
+          const tx = block.transaction;
+          const expectedPayload = `${block.blockIndex}|${tx.id}|${block.prevHash}|${tx.debitAccount}|${tx.creditAccount}|${tx.amount}`;
+          if (block.canonicalPayload !== expectedPayload) {
+            dataBroken = true;
+          }
+        }
+      }
+
+      if (linkageBroken || digestBroken || dataBroken) {
         if (firstBrokenBlock === null) {
           firstBrokenBlock = block.blockIndex;
         }
