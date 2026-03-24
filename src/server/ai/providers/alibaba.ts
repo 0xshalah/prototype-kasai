@@ -88,9 +88,10 @@ No markdown, no markdown blocks, just raw JSON string.`
         transcript: transcription.text,
         confidence: 0.95
       };
-    } catch (e: any) {
-      console.error("[Alibaba Provider] Transcription Error:", e.message);
-      throw new Error(`Alibaba ASR Failed: ${e.message}`);
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      console.error("[Alibaba Provider] Transcription Error:", err.message);
+      throw new Error(`Alibaba ASR Failed: ${err.message}`);
     }
   }
 }

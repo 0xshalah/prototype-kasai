@@ -50,12 +50,13 @@ export async function GET() {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     return NextResponse.json({
         success: false,
         error: {
           code: "INTERNAL_ERROR",
-          message: error.message || "Failed to fetch score",
+          message: err.message || "Failed to fetch score",
           details: {}
         }
     }, { status: 500 });

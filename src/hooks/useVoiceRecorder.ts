@@ -4,6 +4,27 @@ import { useState, useRef, useCallback } from 'react';
 
 export type RecorderState = 'inactive' | 'recording' | 'processing' | 'error';
 
+interface SpeechRecognitionEvent {
+  results: { transcript: string }[][];
+  error: string;
+}
+
+interface SpeechRecognitionInstance {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+}
+
+interface WindowWithSpeech extends Window {
+  SpeechRecognition?: new () => SpeechRecognitionInstance;
+  webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
+}
+
 export function useVoiceRecorder() {
   const [state, setState] = useState<RecorderState>('inactive');
   const [recordingMode, setRecordingMode] = useState<'native' | 'backend' | null>(null);
@@ -11,7 +32,7 @@ export function useVoiceRecorder() {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [nativeTranscript, setNativeTranscript] = useState<string | null>(null);
   
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
 
@@ -24,7 +45,8 @@ export function useVoiceRecorder() {
       chunksRef.current = [];
 
       if (mode === 'native') {
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const win = window as unknown as WindowWithSpeech;
+        const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
         if (!SpeechRecognition) {
           throw new Error('Browser tidak mendukung Quick Voice (SpeechRecognition).');
         }
@@ -34,11 +56,11 @@ export function useVoiceRecorder() {
         recognition.continuous = false;
         recognition.interimResults = false;
         
-        recognition.onresult = (event: any) => {
+        recognition.onresult = (event: SpeechRecognitionEvent) => {
           setNativeTranscript(event.results[0][0].transcript);
         };
         
-        recognition.onerror = (event: any) => {
+        recognition.onerror = (event: SpeechRecognitionEvent) => {
           console.warn('SpeechRecognition error:', event.error);
           setErrorMessage('Gagal merekam: ' + event.error);
           setState('error');
@@ -74,8 +96,9 @@ export function useVoiceRecorder() {
       mediaRecorderRef.current = recorder;
       recorder.start();
       setState('recording');
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Gagal mengakses mikrofon');
+    } catch (err: unknown) {
+      const e = err instanceof Error ? err : new Error(String(err));
+      setErrorMessage(e.message || 'Gagal mengakses mikrofon');
       setState('error');
       setRecordingMode(null);
     }

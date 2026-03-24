@@ -89,7 +89,7 @@ export async function POST(req: Request) {
     let providerUsed = primaryProviderName;
     
     // Explicit Tracking for Structured Error
-    const diagnosticDetails: any = {
+    const diagnosticDetails: Record<string, unknown> = {
       primary: null,
       fallback: null
     };
@@ -97,13 +97,14 @@ export async function POST(req: Request) {
     try {
         console.log(`[Voice Pipeline] Attempting Primary Edge: ${primaryProviderName}`);
         transcriptData = await provider.transcribeAudio(fileForAI);
-    } catch (primaryError: any) {
-        console.warn(`[Voice Pipeline] Primary Provider Failed: ${primaryError.message}`);
+    } catch (primaryError: unknown) {
+        const pErr = primaryError instanceof Error ? primaryError : new Error(String(primaryError));
+        console.warn(`[Voice Pipeline] Primary Provider Failed: ${pErr.message}`);
         
         diagnosticDetails.primary = {
             provider: primaryProviderName,
             status: "failed",
-            reason: primaryError.message || "Unknown Provider Error"
+            reason: pErr.message || "Unknown Provider Error"
         };
         
         // Disable OpenAI fallback temporarily due to known quota limits (429) unless explicitly forced
@@ -120,12 +121,13 @@ export async function POST(req: Request) {
                     providerUsed = 'openai';
                     fallbackTriggered = true;
                 }
-            } catch (fallbackError: any) {
-                console.error(`[Voice Pipeline] Fallback Provider Failed: ${fallbackError.message}`);
+            } catch (fallbackError: unknown) {
+                const fErr = fallbackError instanceof Error ? fallbackError : new Error(String(fallbackError));
+                console.error(`[Voice Pipeline] Fallback Provider Failed: ${fErr.message}`);
                 diagnosticDetails.fallback = {
                     provider: 'openai',
                     status: "failed",
-                    reason: fallbackError.message || "Unknown Fallback Error"
+                    reason: fErr.message || "Unknown Fallback Error"
                 };
             }
         } else {
@@ -164,12 +166,13 @@ export async function POST(req: Request) {
         }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     return NextResponse.json({
         success: false,
         error: {
           code: "INTERNAL_ERROR",
-          message: error.message || "Failed to handle transcribe request",
+          message: err.message || "Failed to handle transcribe request",
           details: {}
         }
     }, { status: 500 });

@@ -127,12 +127,13 @@ export async function POST(req: Request) {
       }
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
     return NextResponse.json({
         success: false,
         error: {
           code: "INTERNAL_ERROR",
-          message: error.message || "Gagal melakukan commit ke ledger",
+          message: err.message || "Gagal melakukan commit ke ledger",
           details: {}
         }
     }, { status: 500 });

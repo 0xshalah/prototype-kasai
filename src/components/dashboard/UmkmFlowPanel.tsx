@@ -9,12 +9,20 @@ interface UmkmFlowPanelProps {
   onSwitchToBank?: () => void;
 }
 
+interface CommitSuccessData {
+  transactionId: string;
+  vaultBlock?: { blockIndex: number };
+  ledgerSummary?: { cashBalance: number };
+  scoreSnapshot?: { totalScore: number };
+  journalEntries?: { accountName: string; entryType: string; amount: number }[];
+}
+
 export function UmkmFlowPanel({ onCommitSuccess, onSwitchToBank }: UmkmFlowPanelProps) {
   const [inputText, setInputText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [parseResult, setParseResult] = useState<TransactionParseResult | null>(null);
-  const [ambiguityError, setAmbiguityError] = useState<{message: string, details: any} | null>(null);
-  const [commitSuccessData, setCommitSuccessData] = useState<any | null>(null);
+  const [ambiguityError, setAmbiguityError] = useState<{message: string, details: TransactionParseResult | null} | null>(null);
+  const [commitSuccessData, setCommitSuccessData] = useState<CommitSuccessData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const resetFlow = () => {
@@ -294,7 +302,7 @@ export function UmkmFlowPanel({ onCommitSuccess, onSwitchToBank }: UmkmFlowPanel
                 </tr>
               </thead>
               <tbody>
-                {commitSuccessData.journalEntries?.map((entry: any, i: number) => (
+                {commitSuccessData.journalEntries?.map((entry: NonNullable<CommitSuccessData['journalEntries']>[number], i: number) => (
                   <tr key={i} className="border-t border-brand-success/10">
                     <td className={`px-4 py-2.5 font-medium ${i > 0 ? 'pl-8 text-secondary' : 'text-primary'}`}>{entry.accountName}</td>
                     <td className="px-4 py-2.5 text-right font-mono text-brand-primary">

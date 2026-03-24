@@ -14,10 +14,10 @@ export class AuditService {
   }
 
   async verifyChain(businessId: string) {
-    const vaultRepo = new VaultRepository(this.prisma);
-    const txRepo = new TransactionRepository(this.prisma);
-
-    const blocks = await vaultRepo.getChain(businessId, 1000);
+    const blocks = await this.prisma.vaultBlock.findMany({
+      take: 1000,
+      orderBy: { blockIndex: "asc" }
+    });
 
     if (blocks.length === 0) {
       return { valid: true, firstBrokenBlock: null as number | null, invalidBlocks: [] as number[] };
@@ -46,13 +46,14 @@ export class AuditService {
 
     const valid = firstBrokenBlock === null;
 
-    await txRepo.createAuditEvent({
-      businessId,
-      eventType: valid ? "VERIFY_PASSED" : "VERIFY_FAILED",
-      message: valid
-        ? "Audit verify passed: chain is valid"
-        : `Audit verify failed starting from block #${firstBrokenBlock}`,
-      metadata: { valid, firstBrokenBlock, invalidBlocks },
+    await this.prisma.auditEvent.create({
+      data: {
+        eventType: valid ? "VERIFY_PASSED" : "VERIFY_FAILED",
+        targetBlockIndex: firstBrokenBlock !== null ? firstBrokenBlock : undefined,
+        message: valid
+          ? "Audit verify passed: chain is valid"
+          : `Audit verify failed starting from block #${firstBrokenBlock} for business ${businessId}`
+      }
     });
 
     return { valid, firstBrokenBlock, invalidBlocks };
@@ -63,28 +64,24 @@ export class AuditService {
     targetBlockIndex: number;
     mode?: "append_amount_digits";
   }) {
-    const vaultRepo = new VaultRepository(this.prisma);
-    const txRepo = new TransactionRepository(this.prisma);
-
-    const block = await vaultRepo.getBlockByIndex(input.businessId, input.targetBlockIndex);
+    const block = await this.prisma.vaultBlock.findUnique({
+      where: { blockIndex: input.targetBlockIndex }
+    });
     if (!block) return null;
 
     const nextCanonicalPayload = `${block.canonicalPayload}99`;
 
-    const updated = await vaultRepo.updateBlockCanonicalPayload({
-      id: block.id,
-      canonicalPayload: nextCanonicalPayload,
+    const updated = await this.prisma.vaultBlock.update({
+      where: { id: block.id },
+      data: { canonicalPayload: nextCanonicalPayload }
     });
 
-    await txRepo.createAuditEvent({
-      businessId: input.businessId,
-      eventType: "TAMPER_SIMULATED",
-      message: `Tamper simulated on block #${input.targetBlockIndex}`,
-      metadata: {
-        mode: input.mode ?? "append_amount_digits",
-        originalCanonicalPayload: block.canonicalPayload,
-        tamperedCanonicalPayload: nextCanonicalPayload,
-      },
+    await this.prisma.auditEvent.create({
+      data: {
+        eventType: "TAMPER_SIMULATED",
+        targetBlockIndex: input.targetBlockIndex,
+        message: `Tamper simulated on block #${input.targetBlockIndex} for business ${input.businessId}`,
+      }
     });
 
     return {

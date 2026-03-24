@@ -6,7 +6,7 @@ export class ScoreService {
     tx: Prisma.TransactionClient,
     data: { transactionId: string; intent: string }
   ) {
-    let lastScore = await ScoreRepository.getLatestScore(tx);
+    const lastScore = await ScoreRepository.getLatestScore(tx);
 
     const baseScore = lastScore ? lastScore.totalScore : 680;
     const isPrive = data.intent === "prive";
