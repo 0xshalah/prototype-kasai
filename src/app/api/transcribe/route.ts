@@ -56,6 +56,8 @@ export async function POST(req: Request) {
     const voiceApiUrl = process.env.VOICE_API_URL;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
+    console.log(`[DEBUG] groqApiKey present: ${!!groqApiKey}, voiceApiUrl: ${voiceApiUrl}`);
+
     // --- 1. Primary: Groq (High Performance) ---
     if (groqApiKey) {
       try {
@@ -80,7 +82,12 @@ export async function POST(req: Request) {
         if (!response.ok) throw new Error(data.error?.message || `Groq status ${response.status}`);
 
         const transcriptText = (data.text || "").trim();
-        if (!transcriptText) throw new Error("Groq returned empty transcript");
+        
+        // Hallucination filters
+        const hallucinations = ["Terimakasih", "Terima kasih", "Thanks for watching", "Thank you"];
+        if (!transcriptText || hallucinations.some((h: string) => transcriptText.toLowerCase().includes(h.toLowerCase()) && transcriptText.length < 20)) {
+           throw new Error("Suara tidak terdengar jelas atau mengandung gangguan (Hallucination detected)");
+        }
 
         return NextResponse.json({
             success: true,
@@ -113,7 +120,12 @@ export async function POST(req: Request) {
         if (!response.ok) throw new Error(data.error || `VPS status ${response.status}`);
 
         const transcriptText = (data.transcript || "").trim();
-        if (!transcriptText) throw new Error("VPS returned empty transcript");
+        
+        // Hallucination filters
+        const hallucinations = ["Terimakasih", "Terima kasih", "Thanks for watching", "Thank you"];
+        if (!transcriptText || hallucinations.some((h: string) => transcriptText.toLowerCase().includes(h.toLowerCase()) && transcriptText.length < 20)) {
+           throw new Error("Suara tidak terdengar jelas atau mengandung gangguan (Hallucination detected)");
+        }
 
         return NextResponse.json({
             success: true,
@@ -144,7 +156,12 @@ export async function POST(req: Request) {
         if (!whisperRes.ok) throw new Error(whisperData.error?.message || `Whisper status ${whisperRes.status}`);
 
         const transcriptText = (whisperData.text || "").trim();
-        if (!transcriptText) throw new Error("Whisper returned empty transcript");
+        
+        // Hallucination filters (common when there's silence or noise)
+        const hallucinations = ["Terimakasih", "Terima kasih", "Thanks for watching", "Thank you"];
+        if (!transcriptText || hallucinations.some(h => transcriptText.toLowerCase().includes(h.toLowerCase()) && transcriptText.length < 20)) {
+           throw new Error("Suara tidak terdengar jelas atau mengandung gangguan (Hallucination detected)");
+        }
 
         return NextResponse.json({
             success: true,

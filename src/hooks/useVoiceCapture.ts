@@ -22,7 +22,7 @@ export function useVoiceCapture() {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
 
-      recorder.start();
+      recorder.start(100); // Capture in 100ms chunks for reliability
       mediaRecorderRef.current = recorder;
     } catch (err: unknown) {
       const e = err instanceof Error ? err : new Error(String(err));
