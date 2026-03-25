@@ -53,65 +53,81 @@ export async function POST(req: Request) {
     }
 
     const voiceApiUrl = process.env.VOICE_API_URL;
+    const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    if (!voiceApiUrl) {
-      return NextResponse.json({
-        success: false,
-        error: {
-          code: "VOICE_API_NOT_CONFIGURED",
-          message: "Sovereign AI VPS URL belum dikonfigurasi di .env",
-          details: {}
-        }
-      }, { status: 503 });
+    // --- Primary: Sovereign VPS ---
+    if (voiceApiUrl) {
+      try {
+        console.log(`[Voice Pipeline] Trying Sovereign AI VPS: ${voiceApiUrl}`);
+        const vpsController = new AbortController();
+        const vpsTimeout = setTimeout(() => vpsController.abort(), 8000);
+
+        const vpsFormData = new FormData();
+        vpsFormData.append('audio', audioFile, audioFile.name || 'recording.webm');
+        
+        const response = await fetch(voiceApiUrl, {
+          method: 'POST',
+          body: vpsFormData,
+          signal: vpsController.signal,
+        });
+        clearTimeout(vpsTimeout);
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || `VPS status ${response.status}`);
+
+        const transcriptText = (data.transcript || "").trim();
+        if (!transcriptText) throw new Error("VPS returned empty transcript");
+
+        return NextResponse.json({
+            success: true,
+            data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "vps-sovereign", fallbackTriggered: false }
+        });
+      } catch (vpsError: unknown) {
+        const vErr = vpsError instanceof Error ? vpsError : new Error(String(vpsError));
+        console.warn(`[Voice Pipeline] VPS failed (${vErr.message}), trying OpenAI Whisper fallback...`);
+      }
     }
 
-    try {
-      console.log(`[Voice Pipeline] Forwarding payload ke Sovereign AI: ${voiceApiUrl}`);
+    // --- Fallback: OpenAI Whisper ---
+    if (openaiApiKey) {
+      try {
+        console.log('[Voice Pipeline] Falling back to OpenAI Whisper API');
+        const whisperFormData = new FormData();
+        whisperFormData.append('file', audioFile, audioFile.name || 'recording.webm');
+        whisperFormData.append('model', 'whisper-1');
+        whisperFormData.append('language', 'id');
 
-      // Forward file-nya saja ke VPS menggunakan formData Node native
-      const vpsFormData = new FormData();
-      vpsFormData.append('audio', audioFile, audioFile.name || 'recording.webm');
-      
-      const response = await fetch(voiceApiUrl, {
-        method: 'POST',
-        body: vpsFormData,
-      });
+        const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${openaiApiKey}` },
+          body: whisperFormData,
+        });
 
-      const data = await response.json();
+        const whisperData = await whisperRes.json();
+        if (!whisperRes.ok) throw new Error(whisperData.error?.message || `Whisper status ${whisperRes.status}`);
 
-      if (!response.ok) {
-        throw new Error(data.error || `VPS Transcription failed with status ${response.status}`);
-      }
+        const transcriptText = (whisperData.text || "").trim();
+        if (!transcriptText) throw new Error("Whisper returned empty transcript");
 
-      const transcriptText = data.transcript || "";
-
-      if (!transcriptText.trim()) {
-        throw new Error("Transkripsi mengembalikan hasil kosong");
-      }
-
-      return NextResponse.json({
-          success: true,
-          data: {
-              transcript: transcriptText,
-              confidence: 0.99, // Assumption from VPS
-              durationSeconds: 0,
-              provider: "vps-sovereign",
-              fallbackTriggered: false
-          }
-      });
-    } catch (primaryError: unknown) {
-        const pErr = primaryError instanceof Error ? primaryError : new Error(String(primaryError));
-        console.error(`[Voice Pipeline] VPS Provider Failed: ${pErr.message}`);
-        
+        return NextResponse.json({
+            success: true,
+            data: { transcript: transcriptText, confidence: 0.95, durationSeconds: 0, provider: "openai-whisper", fallbackTriggered: true }
+        });
+      } catch (whisperError: unknown) {
+        const wErr = whisperError instanceof Error ? whisperError : new Error(String(whisperError));
+        console.error(`[Voice Pipeline] OpenAI Whisper also failed: ${wErr.message}`);
         return NextResponse.json({
             success: false,
-            error: {
-                code: "TRANSCRIPTION_FAILED",
-                message: "Gagal memproses audio di Sovereign AI",
-                details: { error: pErr.message }
-            }
+            error: { code: "TRANSCRIPTION_FAILED", message: "Gagal memproses audio di semua provider", details: { error: wErr.message } }
         }, { status: 500 });
+      }
     }
+
+    // No provider configured
+    return NextResponse.json({
+      success: false,
+      error: { code: "VOICE_API_NOT_CONFIGURED", message: "Tidak ada provider transkripsi yang dikonfigurasi (VOICE_API_URL atau OPENAI_API_KEY)", details: {} }
+    }, { status: 503 });
 
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error));
