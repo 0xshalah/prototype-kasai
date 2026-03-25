@@ -27,10 +27,11 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
         </ThemeProvider>
-        <Script src="https://cdn.tailwindcss.com" strategy="afterInteractive" />
-        <Script id="tailwind-config" strategy="afterInteractive">
-          {`tailwind.config = { theme: { extend: { colors: { page: { DEFAULT: 'var(--bg-page)', elevated: 'var(--bg-page-elevated)' }, card: { DEFAULT: 'var(--bg-card)', muted: 'var(--bg-card-muted)' }, border: { subtle: 'var(--border-subtle)', strong: 'var(--border-strong)' }, primary: 'var(--text-primary)', secondary: 'var(--text-secondary)', muted: 'var(--text-muted)', 'on-brand': 'var(--text-on-brand)', accent: { soft: 'var(--accent-soft)', glow: 'var(--accent-glow)' }, brand: { primary: { DEFAULT: 'var(--brand-primary)', hover: 'var(--brand-primary-hover)' }, success: 'var(--brand-success)', warning: 'var(--brand-warning)', danger: 'var(--brand-danger)', info: 'var(--brand-info)' } } } } }`}
+        {/* Set config BEFORE tailwind CDN loads — inline beforeInteractive does not trigger no-sync-scripts lint */}
+        <Script id="tailwind-config" strategy="beforeInteractive">
+          {`window.tailwind = { config: { theme: { extend: { colors: { page: { DEFAULT: 'var(--bg-page)', elevated: 'var(--bg-page-elevated)' }, card: { DEFAULT: 'var(--bg-card)', muted: 'var(--bg-card-muted)' }, border: { subtle: 'var(--border-subtle)', strong: 'var(--border-strong)' }, primary: 'var(--text-primary)', secondary: 'var(--text-secondary)', muted: 'var(--text-muted)', 'on-brand': 'var(--text-on-brand)', accent: { soft: 'var(--accent-soft)', glow: 'var(--accent-glow)' }, brand: { primary: { DEFAULT: 'var(--brand-primary)', hover: 'var(--brand-primary-hover)' }, success: 'var(--brand-success)', warning: 'var(--brand-warning)', danger: 'var(--brand-danger)', info: 'var(--brand-info)' } } } } } }`}
         </Script>
+        <Script src="https://cdn.tailwindcss.com" strategy="afterInteractive" />
       </body>
     </html>
   );
