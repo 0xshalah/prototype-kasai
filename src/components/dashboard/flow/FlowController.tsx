@@ -143,13 +143,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
   const isProcessingIndicator = flowState === 'PROCESSING';
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="mb-2">
-        <h2 className="text-xl font-bold text-primary">Terminal KasAI UMKM</h2>
-        <p className="text-secondary text-sm">Rekam transaksi bisnismu menggunakan suara atau ketikan natural.</p>
-      </div>
-
-      <VoiceInput 
+    <div className="flex flex-col gap-6 w-full">      <VoiceInput 
         inputText={inputText}
         onInputChange={setInputText}
         onParseText={() => executeParse(inputText)}
