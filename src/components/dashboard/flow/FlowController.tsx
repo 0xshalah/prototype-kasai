@@ -50,7 +50,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const res = await transcribeAudio(blob);
+      const res = await transcribeAudio(blob, controller.signal);
       clearTimeout(timeoutId);
       if (res.success && res.data) {
         if (!res.data.transcript || res.data.transcript.trim() === "") {
@@ -154,7 +154,7 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
            voiceCapture.startRecording();
         }}
         onStopVoice={handleStopVoice}
-        voiceErrorMessage={voiceCapture.errorMessage}
+        voiceErrorMessage={voiceCapture.errorMessage || errorMessage}
       />
 
       {errorMessage && (

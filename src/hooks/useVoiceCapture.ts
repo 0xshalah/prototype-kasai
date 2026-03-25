@@ -44,6 +44,7 @@ export function useVoiceCapture() {
         chunksRef.current = [];
         // Stop all audio tracks
         recorder.stream.getTracks().forEach(track => track.stop());
+        setState('IDLE');
         resolve(blob);
       };
 
