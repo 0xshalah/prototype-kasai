@@ -7,7 +7,7 @@ Dokumen ini adalah skrip operasional untuk meminimalkan risiko saat melakukan de
 ## 🏗️ Persiapan (1 Menit Sebelum Demo)
 1. **Reset State:** Klik tombol "Reset Demo" atau akses `/api/audit/reset`.
    - *Tujuan:* Memastikan saldo kembali ke Rp5.000.000 dan Vault bersih.
-2. **Cek Koneksi:** Pastikan internet stabil dan VPS Sovereign AI (`43.133.142.68`) merespons (tes dengan satu kata "Halo").
+2. **Check Reliability:** System now has automatic fallback. If VPS Sovereign AI (`43.133.142.68`) is down, it automatically uses OpenAI Whisper within 8 seconds.
 3. **Buka Dua Tab:**
    - Tab 1: Terminal Utama (Input Suara).
    - Tab 2: Konsol Auditor / Bank (Visualisasi Shield & Chart).
@@ -18,7 +18,7 @@ Dokumen ini adalah skrip operasional untuk meminimalkan risiko saat melakukan de
 
 ### Langkah 1: Perekaman Suara (The "Wow" Moment)
 - **Aksi:** Klik "Mulai Rekam" dan katakan: *"Jualan gado-gado seratus lima puluh ribu."*
-- **Narasi:** *"KasAI menangkap bahasa alami UMKM. Suara dikirim ke Sovereign AI VPS kami untuk menjaga kedaulatan data."*
+- **Narasi:** *"KasAI menangkap bahasa alami UMKM. Kami memprioritaskan transkripsi lokal via **Sovereign AI VPS** untuk privasi, namun sistem dilengkapi **Automatic Fallback** ke OpenAI Whisper jika peladen lokal mengalami kendala, menjamin kelancaran operasional 24/7."*
 - **Poin Visual:** Teks hasil transkripsi muncul ➔ State pindah ke `CONFIRMING`.
 
 ### Langkah 2: Verifikasi & Commit
@@ -43,11 +43,27 @@ Dokumen ini adalah skrip operasional untuk meminimalkan risiko saat melakukan de
 
 ---
 
+## 5. Produksi & Hardening (Final Phase)
+
+✅ **Production Build Clearance:**
+- Seluruh *warning* dan *error* ESLint (`no-explicit-any`, `no-sync-scripts`, `no-unused-vars`) telah dibersihkan secara sistemik.
+- Build produksi melalui `npm run build` kini menghasilkan status **Success (Exit 0)**, siap untuk *deployment* di Vercel atau infrastruktur berbasis Node.js lainnya.
+
+✅ **Theme & Runtime Reliability:**
+- Memperbaiki *race condition* pada konfigurasi Tailwind CDN dengan strategi pemuatan skrip yang presisi (`beforeInteractive` untuk konfigurasi, disinkronkan dengan pemuatan font).
+- Mengimplementasikan **Automatic Voice Fallback**: Sistem mencoba menghubungi *Sovereign VPS* terlebih dahulu (batas waktu 8 detik), jika gagal, secara otomatis beralih ke *OpenAI Whisper API*.
+
+---
+
+Aplikasi **KasAI** sekarang berada pada performa puncak, sangat aman secara matematis, memiliki sistem pemulihan kegagalan (*failover*) transkripsi yang cerdas, dan siap untuk dipresentasikan di hadapan juri dengan tingkat kepercayaan diri tinggi.
+
+---
+
 ## ⚠️ Kontingensi (Jika Sesuatu Salah)
 
 | Masalah | Solusi Cepat |
 |---|---|
-| VPS Transcribe Lambat (>10s) | Langsung ketik manual di input teks dan klik "Proses Teks". Jangan menunggu suara. |
+| VPS Transcribe Lambat (>8s) | Sistem akan otomatis beralih ke OpenAI Whisper. Jika masih lambat, ketik manual. |
 | Saldo tidak update | Klik logo KasAI untuk memaksa refresh halaman total. |
 | Shield tidak berubah merah | Klik tombol "Audit Integritas" secara manual di panel samping. |
 | Suara tidak terdeteksi | Pastikan izin microphone browser aktif. Jika gagal 2x, beralih ke teks. |

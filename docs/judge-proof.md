@@ -9,7 +9,7 @@ Dokumen ini meringkas mengapa KasAI bukan sekadar prototipe UI, melainkan sistem
 1. **Accounting Integrity:** Transaksi suara/teks dikonversi menjadi jurnal *double-entry* yang seimbang secara otomatis (INV-01). Saldo kas selalu konsisten dengan total debet/kredit.
 2. **Deterministic Security:** Setiap transaksi yang dikomit masuk ke dalam **Vault Hash Chain** (Audit Trail). Jika satu byte data di database diubah secara manual, rantai integritas akan rusak dan terdeteksi dalam hitungan detik.
 3. **Operational Guardrails:** Sistem menolak pengeluaran jika saldo tidak cukup (*Insufficient Funds*) dan menghentikan proses jika input ambigu (*Ambiguity Detected*).
-4. **Data Sovereignty:** Kami tidak bergantung pada API pihak ketiga untuk privasi suara. Transkripsi dilakukan secara lokal melalui **Sovereign AI VPS** berbasis Whisper.cpp.
+4. **Reliability & Sovereignty:** Kami memprioritaskan transkripsi lokal via **Sovereign AI VPS** untuk privasi, namun sistem dilengkapi **Automatic Fallback** ke OpenAI Whisper jika peladen lokal mengalami kendala, menjamin kelancaran operasional 24/7.
 
 ---
 

@@ -52,10 +52,47 @@ export async function POST(req: Request) {
       }, { status: 415 });
     }
 
+    const groqApiKey = process.env.GROQ_API_KEY;
     const voiceApiUrl = process.env.VOICE_API_URL;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    // --- Primary: Sovereign VPS ---
+    // --- 1. Primary: Groq (High Performance) ---
+    if (groqApiKey) {
+      try {
+        console.log(`[Voice Pipeline] Trying Groq Cloud (whisper-large-v3)`);
+        const groqController = new AbortController();
+        const groqTimeout = setTimeout(() => groqController.abort(), 5000);
+
+        const groqFormData = new FormData();
+        groqFormData.append('file', audioFile, 'recording.webm');
+        groqFormData.append('model', 'whisper-large-v3');
+        groqFormData.append('language', 'id');
+
+        const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${groqApiKey}` },
+          body: groqFormData,
+          signal: groqController.signal,
+        });
+        clearTimeout(groqTimeout);
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || `Groq status ${response.status}`);
+
+        const transcriptText = (data.text || "").trim();
+        if (!transcriptText) throw new Error("Groq returned empty transcript");
+
+        return NextResponse.json({
+            success: true,
+            data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "groq-whisper", fallbackTriggered: false }
+        });
+      } catch (groqError: unknown) {
+        const gErr = groqError instanceof Error ? groqError : new Error(String(groqError));
+        console.warn(`[Voice Pipeline] Groq failed (${gErr.message}), trying VPS...`);
+      }
+    }
+
+    // --- 2. Secondary: Sovereign VPS ---
     if (voiceApiUrl) {
       try {
         console.log(`[Voice Pipeline] Trying Sovereign AI VPS: ${voiceApiUrl}`);
@@ -80,7 +117,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             success: true,
-            data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "vps-sovereign", fallbackTriggered: false }
+            data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "vps-sovereign", fallbackTriggered: true }
         });
       } catch (vpsError: unknown) {
         const vErr = vpsError instanceof Error ? vpsError : new Error(String(vpsError));
@@ -88,7 +125,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // --- Fallback: OpenAI Whisper ---
+    // --- 3. Tertiary: OpenAI Whisper ---
     if (openaiApiKey) {
       try {
         console.log('[Voice Pipeline] Falling back to OpenAI Whisper API');
@@ -115,7 +152,7 @@ export async function POST(req: Request) {
         });
       } catch (whisperError: unknown) {
         const wErr = whisperError instanceof Error ? whisperError : new Error(String(whisperError));
-        console.error(`[Voice Pipeline] OpenAI Whisper also failed: ${wErr.message}`);
+        console.error(`[Voice Pipeline] All providers failed: ${wErr.message}`);
         return NextResponse.json({
             success: false,
             error: { code: "TRANSCRIPTION_FAILED", message: "Gagal memproses audio di semua provider", details: { error: wErr.message } }
@@ -126,7 +163,7 @@ export async function POST(req: Request) {
     // No provider configured
     return NextResponse.json({
       success: false,
-      error: { code: "VOICE_API_NOT_CONFIGURED", message: "Tidak ada provider transkripsi yang dikonfigurasi (VOICE_API_URL atau OPENAI_API_KEY)", details: {} }
+      error: { code: "VOICE_API_NOT_CONFIGURED", message: "Tidak ada provider transkripsi (GROQ, VPS, atau OPENAI)", details: {} }
     }, { status: 503 });
 
   } catch (error: unknown) {
