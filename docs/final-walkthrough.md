@@ -1,6 +1,6 @@
 # KasAI: Infrastruktur Keuangan Terverifikasi
 
-Dokumen ini merangkum seluruh perjalanan stabilisasi dan peningkatan fitur pada sistem *Voice- **Database Stability:** Menggunakan *absolute path* untuk koneksi SQLite guna menghindari ambiguitas resolusi jalur antara Prisma CLI dan runtime Next.js.
+Dokumen ini merangkum seluruh perjalanan stabilisasi dan peningkatan fitur pada sistem *Voice- **Cloud Database Persistence:** Migrasi penuh dari SQLite ke **Supabase PostgreSQL**. Data transaksi kini tersimpan secara awan dan aman, memungkinkan demonstrasi *live* di Vercel tanpa risiko kehilangan data.
 pada *Hackathon*.
 
 <br/>
@@ -40,7 +40,7 @@ pada *Hackathon*.
 - **AcsScoreGauge:** Menggunakan komputasi elemen `SVG` dinamis untuk merender meteran Risiko Kredit AI dari 300 hingga 850.
 - **Visual Shield Polling:** Tameng Kriptografis25. Apakah penyesuaian untuk mempertahankan *wrapper* kembalian UI (`success` & `data`) di atas sudah sesuai? Jika Anda setuju, saya akan langsung mengeksekusi pemasangan ke VPS Anda.
 26. 
-27.- [x] Phase 7: Real-world Environment Tuning (Absolute DB Path & Process Sanitization)
+27.- [x] Phase 7: Real-world Environment Tuning (Supabase Cloud Migration & Vercel Persistency)
 28. 
 29. ### Groq Cloud Integration
 30. #### [MODIFY] `src/app/api/transcribe/route.ts`
