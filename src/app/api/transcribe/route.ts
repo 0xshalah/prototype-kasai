@@ -89,6 +89,7 @@ export async function POST(req: Request) {
            throw new Error("Suara tidak terdengar jelas atau mengandung gangguan (Hallucination detected)");
         }
 
+        console.log(`[v5-final] Groq Output: "${transcriptText}"`);
         return NextResponse.json({
             success: true,
             data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "groq-whisper", fallbackTriggered: false }

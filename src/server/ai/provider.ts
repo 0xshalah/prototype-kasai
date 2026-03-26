@@ -25,6 +25,9 @@ export async function getActiveAIProvider(): Promise<AIProvider | null> {
   } else if (activeName === 'openai') {
     const { OpenAIProvider } = await import('./providers/openai');
     return new OpenAIProvider();
+  } else if (activeName === 'groq') {
+    const { GroqProvider } = await import('./providers/groq');
+    return new GroqProvider();
   }
   
   return null;
