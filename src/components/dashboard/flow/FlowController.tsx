@@ -63,11 +63,13 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
         // Automatically parse after transcription arrives
         await executeParse(appended);
       } else {
-        setErrorMessage(`Gagal transkripsi suara: ${res.error?.message}. Coba ketik secara manual.`);
+        console.error("[FlowController] Transcribe failed:", res.error);
+        setErrorMessage(`Gagal transkripsi suara: ${res.error?.message || 'Unknown error'}.`);
         setFlowState('IDLE');
       }
-    } catch {
-       setErrorMessage("Kesalahan jaringan saat transkripsi.");
+    } catch (e: unknown) {
+       console.error("[FlowController] Network error:", e);
+       setErrorMessage(`Kesalahan jaringan: ${e instanceof Error ? e.message : 'Unknown'}`);
        setFlowState('IDLE');
     }
   };
@@ -91,6 +93,9 @@ export function FlowController({ onCommitSuccess, onSwitchToBank }: FlowControll
           details: res.error.details as TransactionParseResult
         });
         setFlowState('CONFIRMING');
+      } else if (res.error?.code === "VOICE_API_NOT_CONFIGURED") {
+        setErrorMessage(res.error.message);
+        setFlowState('IDLE');
       } else {
         setErrorMessage(res.error?.message || "Gagal memparsing teks");
         setFlowState('IDLE');

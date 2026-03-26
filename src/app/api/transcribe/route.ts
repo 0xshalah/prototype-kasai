@@ -56,14 +56,13 @@ export async function POST(req: Request) {
     const voiceApiUrl = process.env.VOICE_API_URL;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    console.log(`[DEBUG] groqApiKey present: ${!!groqApiKey}, voiceApiUrl: ${voiceApiUrl}`);
 
     // --- 1. Primary: Groq (High Performance) ---
     if (groqApiKey) {
       try {
         console.log(`[Voice Pipeline] Trying Groq Cloud (whisper-large-v3)`);
         const groqController = new AbortController();
-        const groqTimeout = setTimeout(() => groqController.abort(), 5000);
+        const groqTimeout = setTimeout(() => groqController.abort(), 10000);
 
         const groqFormData = new FormData();
         groqFormData.append('file', audioFile, 'recording.webm');
@@ -85,18 +84,22 @@ export async function POST(req: Request) {
         
         // Hallucination filters
         const hallucinations = ["Terimakasih", "Terima kasih", "Thanks for watching", "Thank you"];
-        if (!transcriptText || hallucinations.some((h: string) => transcriptText.toLowerCase().includes(h.toLowerCase()) && transcriptText.length < 20)) {
-           throw new Error("Suara tidak terdengar jelas atau mengandung gangguan (Hallucination detected)");
+        const isHallucination = hallucinations.some((h: string) => 
+          transcriptText.toLowerCase() === h.toLowerCase() || 
+          (transcriptText.toLowerCase().includes(h.toLowerCase()) && transcriptText.length < 15)
+        );
+
+        if (!transcriptText || isHallucination) {
+           throw new Error(`Kualitas audio rendah atau suara tidak terdeteksi.`);
         }
 
-        console.log(`[v5-final] Groq Output: "${transcriptText}"`);
         return NextResponse.json({
             success: true,
             data: { transcript: transcriptText, confidence: 0.99, durationSeconds: 0, provider: "groq-whisper", fallbackTriggered: false }
         });
       } catch (groqError: unknown) {
         const gErr = groqError instanceof Error ? groqError : new Error(String(groqError));
-        console.warn(`[Voice Pipeline] Groq failed (${gErr.message}), trying VPS...`);
+        console.warn(`[Voice Pipeline] Groq failed (${gErr.message}), falling back...`);
       }
     }
 
@@ -105,7 +108,7 @@ export async function POST(req: Request) {
       try {
         console.log(`[Voice Pipeline] Trying Sovereign AI VPS: ${voiceApiUrl}`);
         const vpsController = new AbortController();
-        const vpsTimeout = setTimeout(() => vpsController.abort(), 8000);
+        const vpsTimeout = setTimeout(() => vpsController.abort(), 12000);
 
         const vpsFormData = new FormData();
         vpsFormData.append('audio', audioFile, audioFile.name || 'recording.webm');
@@ -121,6 +124,7 @@ export async function POST(req: Request) {
         if (!response.ok) throw new Error(data.error || `VPS status ${response.status}`);
 
         const transcriptText = (data.transcript || "").trim();
+        console.log(`[DEBUG-RAW] VPS transcript: "${transcriptText}"`);
         
         // Hallucination filters
         const hallucinations = ["Terimakasih", "Terima kasih", "Thanks for watching", "Thank you"];
