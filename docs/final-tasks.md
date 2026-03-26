@@ -1,0 +1,7 @@
+- [x] Phase 1: Verification of Claims (Accounting & Guardrails)
+- [x] Phase 2: UI/Flow Hardening (State Machine & Polling)
+- [x] Phase 3: Demo Reliability (Deterministic Reset & Repeatability)
+- [x] Phase 4: Judge Packaging & Demo Runbook Preparation
+- [x] Phase 5: End-to-End Performance Optimization (Groq Whisper + Llama 3)
+- [x] Phase 6: Deep Audit & Transcription Hardening
+- [x] Phase 7: Real-world Environment Tuning (Absolute DB Path & Process Sanitization)
