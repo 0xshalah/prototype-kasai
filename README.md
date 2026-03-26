@@ -9,7 +9,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-PROTOTYPE-orange?style=for-the-badge" alt="Status: Prototype" />
   <img src="https://img.shields.io/badge/hackathon-PIDI%20DIGDAYA%202026-blue?style=for-the-badge" alt="PIDI DIGDAYA 2026" />
-  <img src="https://img.shields.io/badge/stack-Next.js%2015%20%7C%20Groq%20%7C%20Prisma%20%7C%20PostgreSQL-black?style=for-the-badge" alt="Stack" />
+  <img src="https://img.shields.io/badge/core--stack-Go%20%7C%20Rust%20%7C%20PostgreSQL-black?style=for-the-badge" alt="Core Stack" />
+  <img src="https://img.shields.io/badge/prototype-Next.js%2015%20%7C%20Groq%20%7C%20Prisma-gray?style=for-the-badge" alt="Prototype Stack" />
 </p>
 
 ---
@@ -80,6 +81,23 @@ Indonesia memiliki lebih dari **65 juta UMKM** yang menyumbang ~60% PDB nasional
 
 ## Tech Stack
 
+### 🏗️ Arsitektur Produksi (Target)
+
+KasAI dirancang dengan arsitektur produksi berbasis **Go** dan **Rust** — dua bahasa yang dipilih karena performa, keamanan memori, dan kesesuaian untuk sistem keuangan:
+
+| Layer | Teknologi | Alasan Pemilihan |
+|---|---|---|
+| **Backend / Orkestrasi** | **Go** | Layanan inti yang efisien untuk orkestrasi API, validasi bisnis, dan manajemen ledger. Go dipilih karena performa tinggi, concurrency model yang kuat, dan ekosistem yang matang untuk microservices. |
+| **Trust Engine / Vault** | **Rust** | Komponen audit trail dan verifikasi integritas data. Rust dipilih karena keamanan memori tanpa garbage collector, performa deterministik, dan jaminan *zero-cost abstractions* — kritis untuk komponen yang menangani integritas keuangan. |
+| **Database** | **PostgreSQL** | Penyimpanan utama untuk ledger, jurnal, dan vault blocks |
+| **Job Queue** | **Redis + BullMQ** | Pemrosesan asinkron untuk audio dan batch scoring |
+| **Object Storage** | **S3-compatible** | Penyimpanan file audio dan bukti digital |
+| **AI Abstraction** | **Provider-agnostic layer** | Agar integrasi AI provider tetap fleksibel |
+
+### 🧪 Stack Prototype Saat Ini
+
+Untuk keperluan validasi konsep dan demo hackathon, prototype dibangun menggunakan stack berikut:
+
 | Layer | Teknologi |
 |---|---|
 | Framework | Next.js 15 (App Router) + TypeScript |
@@ -91,6 +109,8 @@ Indonesia memiliki lebih dari **65 juta UMKM** yang menyumbang ~60% PDB nasional
 | AI Parsing | Groq Cloud (Llama 3.3 70B Versatile) |
 | Kriptografi | Node.js `crypto` (SHA-256) |
 | Deployment | Vercel (function region: `hnd1` / Tokyo) |
+
+> **Catatan:** Prototype Next.js ini membuktikan bahwa alur end-to-end berjalan. Arsitektur produksi akan memigrasikan layanan inti ke **Go** (orkestrasi, guardrail, ledger, scoring) dan **Rust** (trust engine, hash chain verification, audit service), dengan PostgreSQL dan Redis sebagai infrastruktur pendukung.
 
 ---
 
