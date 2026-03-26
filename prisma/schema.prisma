@@ -9,7 +9,7 @@ generator client {
 // For local development, keep provider = "sqlite" and DATABASE_URL="file:./dev.db"
 // For production (Coolify/PostgreSQL), change provider to "postgresql" and set DATABASE_URL in Coolify environment settings.
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
